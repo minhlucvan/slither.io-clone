@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Slither.io Clone - Loonride Example</title>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+    <script src="lib/jquery-3.3.1.min.js"></script>
+    <script src="lib/phaser.min.js"></script>
+    <script src="src/game.js"></script>
+    <script src="src/snake.js"></script>
+    <script src="src/playerSnake.js"></script>
+    <script src="src/botSnake.js"></script>
+    <script src="src/eye.js"></script>
+    <script src="src/eyePair.js"></script>
+    <script src="src/shadow.js"></script>
+    <script src="src/food.js"></script>
+    <script src="src/util.js"></script>
+    <style>
+        p,
+        button {
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        body,
+        html {
+            margin: 0;
+            width: 100%;
+            height: 100%;
+
+        }
+
+        #high-score {
+            position: fixed;
+            border: 1px solid block;
+            background-color: rgba(255, 255, 255, 0.5);
+            top: 10px;
+            right: 10px;
+            width: 30vmin;
+            height: 40vmin;
+        }
+
+        #high-score>.hs-title {
+            text-align: center;
+            font-weight: bold;
+            font-size: 2vmin;
+        }
+
+        #high-score>*>.hs-item {
+            padding-left: 2vmin;
+        }
+
+        #high-score>.hs-list>.hs-item>* {
+            display: inline-block;
+        }
+
+        #high-score>.hs-list>.hs-item>.hs-rank {
+            width: 5vmin;
+
+        }
+
+        #high-score>.hs-list>.hs-item>.hs-name {
+            width: 15vmin;
+        }
+
+        #high-score>.hs-list>.hs-item>.hs-score {
+            width: 5vmin;
+            text-align: right;
+        }
+
+        #gameover {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(255, 255, 255, 0.8);
+            width: 40vmin;
+            height: 20vmin;
+        }
+
+        #gameover>.text {
+            margin-top: 7vmin;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        #gameover>.score {
+            text-align: center;
+        }
+
+        #gameover>button {
+            text-align: center;
+            margin: auto;
+            display: block;
+            border: 1px solid black;
+            background: white;
+            padding: 1vmin;
+            width: 12vmin;
+            border-radius: 1vmin;
+            font-weight: bold;
+            font-size: 2vmin;
+        }
+    </style>
+</head>
+
+<body>
+    <div id='high-score'>
+        <p class="hs-title">High Score</p>
+        <div class='hs-list'>
+            <div class='hs-item'>
+                <p class='hs-rank'> 1. </p>
+                <p class='hs-name'> Admin</p>
+                <p class='hs-score'>0</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="gameover" hidden>
+        <p class='text'> GAME OVER</p>
+        <p class='score'>Score : </p>
+        <button class='replay'>Replay</button>
+    </div>
+
+    <script>
+
+        var container = document.body;
+        game = new Phaser.Game(container.offsetWidth, container.offsetHeight, Phaser.AUTO, null);
+
+        game.state.add('Game', Game);
+        game.state.start('Game');
+
+
+        setInterval(function () {
+            var eScore = $(".hs-score");
+            eScore.text(game.player.score);
+        }, 300);
+
+        function showGameOver() {
+
+            var eGameOver = $("#gameover");
+            var eScore = eGameOver.find(".score");
+            eGameOver.show();
+            eScore.text("Score : " + game.player.score);
+        }
+        var gameOverBtn = $("#gameover > .replay ");
+
+        gameOverBtn.click(function () {
+            var eGameOver = $("#gameover");
+            eGameOver.hide();
+            LOG(game);
+//            game.player.respawn();
+location.reload();
+        })
+        game.showGameOver = showGameOver;
+
+    </script>
+
+</body>
+
+</html>
