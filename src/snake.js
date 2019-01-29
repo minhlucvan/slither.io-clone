@@ -72,6 +72,8 @@ Snake = function(game, spriteKey, x, y, skin, initSections) {
 
     this.scale = this.initialScale + this.sections.length * 0.005;
     this.setScale(this.scale);
+
+    this.head.body.collideWorldBounds = true;
 }
 
 Snake.prototype = {

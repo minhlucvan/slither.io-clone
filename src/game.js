@@ -29,8 +29,8 @@ Game.prototype = {
         this.game.load.image('food', 'asset/hex.png');
     },
     create: function () {
-        var width = this.game.width * 3;
-        var height = this.game.height * 3;
+        var width = this.game.width * 2;
+        var height = this.game.height * 2;
 
         this.game.world.setBounds(-width, -height, width * 2, height * 2);
         this.game.stage.backgroundColor = '#444';
@@ -55,7 +55,7 @@ Game.prototype = {
         this.infoPanel = new InfoPanel(this.game, infoPanelX, infoPanelY); 
 
         //add food randomly
-        for (var i = 0; i < 1500; i++) {
+        for (var i = 0; i < 1000; i++) {
             this.initFood(Util.randomInt(-width, width), Util.randomInt(-height, height));
         }
 
@@ -63,7 +63,7 @@ Game.prototype = {
 
         this.spawnPlayer();
 
-        for (var i = 0; i < 6; i++) {
+        for (var i = 0; i < 8; i++) {
             this.spawnBot();
         }
 
