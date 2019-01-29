@@ -5,7 +5,7 @@
  * @param  {Number} x         coordinate
  * @param  {Number} y         coordinate
  */
-Snake = function(game, spriteKey, x, y) {
+Snake = function(game, spriteKey, x, y, skin, initSections) {
     this.game = game;
     //create an array of snakes in the game object and add this snake
     if (!this.game.snakes) {
@@ -15,9 +15,11 @@ Snake = function(game, spriteKey, x, y) {
     this.debug = false;
     this.snakeLength = 0;
     this.spriteKey = spriteKey;
+    this.skin = skin || 0;
+    this.color = Util.randomInt(0, 0xffffff);
 
     //various quantities that can be changed
-    this.scale = 0.6;
+    this.initialScale = 0.3;
     this.fastSpeed = 200;
     this.slowSpeed = 130;
     this.speed = this.slowSpeed;
@@ -31,7 +33,7 @@ Snake = function(game, spriteKey, x, y) {
     this.headPath = [];
     this.food = [];
 
-    this.preferredDistance = 17 * this.scale;
+    this.preferredDistance = 16 * this.scale;
     this.queuedSections = 0;
 
     //initialize the shadow
@@ -44,7 +46,7 @@ Snake = function(game, spriteKey, x, y) {
 
     this.lastHeadPosition = new Phaser.Point(this.head.body.x, this.head.body.y);
     //add 30 sections behind the head
-    this.initSections(30);
+    this.initSections(initSections || 6);
 
     //initialize the eyes
     this.eyes = new EyePair(this.game, this.head, this.scale);
@@ -67,6 +69,9 @@ Snake = function(game, spriteKey, x, y) {
 
     this.onDestroyedCallbacks = [];
     this.onDestroyedContexts = [];
+
+    this.scale = this.initialScale + this.sections.length * 0.005;
+    this.setScale(this.scale);
 }
 
 Snake.prototype = {
@@ -95,6 +100,8 @@ Snake.prototype = {
     addSectionAtPosition: function(x, y) {
         //initialize a new section
         var sec = this.game.add.sprite(x, y, this.spriteKey);
+        sec.tint = this.color;
+
         this.game.physics.p2.enable(sec, this.debug);
         sec.body.setCollisionGroup(this.collisionGroup);
         sec.body.collides([]);
@@ -239,7 +246,7 @@ Snake.prototype = {
      * first section was at the last call (completed a single cycle)
      */
     onCycleComplete: function() {
-        if (this.queuedSections > 0) {
+        if (Math.floor(this.queuedSections) > 0) {
             var lastSec = this.sections[this.sections.length - 1];
             this.addSectionAtPosition(lastSec.body.x, lastSec.body.y);
             this.queuedSections--;
@@ -251,7 +258,7 @@ Snake.prototype = {
      */
     setScale: function(scale) {
         this.scale = scale;
-        this.preferredDistance = 17 * this.scale;
+        this.preferredDistance = 16 * this.scale;
 
         //update edge lock location with p2 physics
         this.edgeLock.localOffsetB = [
@@ -272,9 +279,14 @@ Snake.prototype = {
     /**
      * Increment length and scale
      */
-    incrementSize: function() {
-        this.addSectionsAfterLast(1);
-        this.setScale(this.scale * 1.01);
+    incrementSize: function(value) {
+        this.addSectionsAfterLast(value || 1);
+        this.setScale(this.initialScale + this.sections.length * 0.005);
+    },
+    die: function() {
+        // this.tween =  this.game.add.tween(this.sectionGroup).to( { alpha: 0 }, 3000, "Linear", true);
+        // this.tween.onComplete.add(this.destroy.bind(this));
+        this.destroy();
     },
     /**
      * Destroy the snake
@@ -310,7 +322,7 @@ Snake.prototype = {
     edgeContact: function(phaserBody) {
         //if the edge hits another snake's section, destroy this snake
         if (phaserBody && this.sections.indexOf(phaserBody.sprite) == -1) {
-            this.destroy();
+            this.die();
         }
         //if the edge hits this snake's own section, a simple solution to avoid
         //glitches is to move the edge to the center of the head, where it
@@ -328,5 +340,8 @@ Snake.prototype = {
     addDestroyedCallback: function(callback, context) {
         this.onDestroyedCallbacks.push(callback);
         this.onDestroyedContexts.push(context);
+    },
+    getScore: function() {
+        return this.sections.length;
     }
 };

@@ -5,8 +5,11 @@
  * @param  {Number} x    coordinate
  * @param  {Number} y    coordinate
  */
-Food = function (game, x, y) {
+Food = function (game, x, y, value) {
     this.game = game;
+    this.x = x;
+    this.y = y;
+    this.value = value || Math.random() * (0.6 - 0) + 0;
     this.debug = false;
     this.sprite = this.game.add.sprite(x, y, 'food');
     this.sprite.tint = Util.randomInt(0, 0xffffff);
@@ -14,6 +17,8 @@ Food = function (game, x, y) {
     this.game.physics.p2.enable(this.sprite, this.debug);
     this.sprite.body.clearShapes();
     this.sprite.body.addCircle(this.sprite.width * 0.5);
+    this.sprite.scale.setTo(2*this.value);
+
     //set callback for when something hits the food
     this.sprite.body.onBeginContact.add(this.onBeginContact, this);
 
@@ -21,6 +26,9 @@ Food = function (game, x, y) {
 
     this.head = null;
     this.constraint = null;
+
+    this.onDestroyedCallbacks = [];
+    this.onDestroyedContexts = [];
 }
 
 Food.prototype = {
@@ -48,7 +56,7 @@ Food.prototype = {
         //increment the size of the snake
         if (this.head && Math.round(this.head.body.x) == Math.round(this.sprite.body.x) &&
             Math.round(this.head.body.y) == Math.round(this.sprite.body.y)) {
-            this.head.snake.incrementSize();
+            this.head.snake.incrementSize(this.value);
             this.destroy();
         }
     },
@@ -62,5 +70,22 @@ Food.prototype = {
             this.head.snake.food.splice(this.head.snake.food.indexOf(this), 1);
             this.head = null;
         }
+
+        //call this snake's destruction callbacks
+        for (var i = 0 ; i < this.onDestroyedCallbacks.length ; i++) {
+            if (typeof this.onDestroyedCallbacks[i] == "function") {
+                this.onDestroyedCallbacks[i].apply(
+                    this.onDestroyedContexts[i], [this]);
+            }
+        }
+    },
+    /**
+     * Add callback for when snake is destroyed
+     * @param  {Function} callback Callback function
+     * @param  {Object}   context  context of callback
+     */
+    addDestroyedCallback: function(callback, context) {
+        this.onDestroyedCallbacks.push(callback);
+        this.onDestroyedContexts.push(context);
     }
 };

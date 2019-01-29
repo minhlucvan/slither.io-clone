@@ -6,7 +6,8 @@
  * @param  {Number} y         coordinate
  */
 PlayerSnake = function(game, spriteKey, x, y) {
-    Snake.call(this, game, spriteKey, x, y);
+    var skin = Util.randomInt(0, 5);
+    Snake.call(this, game, spriteKey, x, y, skin);
     this.cursors = game.input.keyboard.createCursorKeys();
 
     //handle the space key so that the player's snake can speed up
@@ -20,6 +21,7 @@ PlayerSnake = function(game, spriteKey, x, y) {
     }, this);
 
     this.type = 'player';
+    this.name = 'Player';
     this.score = 0;
 }
 

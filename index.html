@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
     <script src="lib/jquery-3.3.1.min.js"></script>
     <script src="lib/phaser.min.js"></script>
+    <script src="lib/phaser-glow-filter.js"></script>
     <script src="src/game.js"></script>
     <script src="src/snake.js"></script>
     <script src="src/playerSnake.js"></script>
@@ -15,7 +16,10 @@
     <script src="src/eyePair.js"></script>
     <script src="src/shadow.js"></script>
     <script src="src/food.js"></script>
+    <script src="src/minimap.js"></script>
+    <script src="src/infoPanel.js"></script>
     <script src="src/util.js"></script>
+    <script src="src/camera.js"></script>
     <style>
         p,
         button {
@@ -57,6 +61,18 @@
 
         #high-score>.hs-list>.hs-item>* {
             display: inline-block;
+        }
+
+        #high-score>.hs-list>.hs-item:nth-child(1) {
+            color: fuchsia;
+        }
+
+        #high-score>.hs-list>.hs-item:nth-child(2) {
+            color: hotpink;
+        }
+
+        #high-score>.hs-list>.hs-item:nth-child(3) {
+            color: pink;
         }
 
         #high-score>.hs-list>.hs-item>.hs-rank {
@@ -111,12 +127,12 @@
 <body>
     <div id='high-score'>
         <p class="hs-title">High Score</p>
+        <div class='hs-item' id="hs-item-tpl">
+            <p class='hs-rank'></p>
+            <p class='hs-name'></p>
+            <p class='hs-score'></p>
+        </div>
         <div class='hs-list'>
-            <div class='hs-item'>
-                <p class='hs-rank'> 1. </p>
-                <p class='hs-name'> Admin</p>
-                <p class='hs-score'>0</p>
-            </div>
         </div>
     </div>
 
@@ -136,9 +152,39 @@
 
 
         setInterval(function () {
-            var eScore = $(".hs-score");
-            eScore.text(game.player.score);
-        }, 300);
+            var rankList = $('.hs-list');
+            rankList.empty();
+
+            var ranks =  game.snakes.sort(function(a, b) {
+                return b.getScore() - a.getScore();
+            });
+
+            var topRanks = ranks.slice(0, 6);
+
+            var hasRank = topRanks.find(function(snake) {
+                return snake.type == 'player';
+            });
+
+            if( !hasRank ) {
+                topRanks[topRanks.length - 1] = game.player;
+            }
+
+            for( var snake of topRanks ) {
+                var rank = ranks.indexOf(snake) + 1;
+
+                var template = $('#hs-item-tpl').clone();
+                template.removeAttr('hs-item-tpl');
+
+                template.find('.hs-rank').text( rank + '. ' );
+                template.find('.hs-name').text( snake.name );
+                template.find('.hs-score').text(snake.getScore());
+
+                rankList.append(template);
+                if(snake.type == 'player') {
+                    hasRank = true;
+                }
+            }
+        }, 500);
 
         function showGameOver() {
 
@@ -146,15 +192,17 @@
             var eScore = eGameOver.find(".score");
             eGameOver.show();
             eScore.text("Score : " + game.player.score);
+            var maxScore = +window.localStorage.getItem('maxScore') || 0;
+            var score =  game.player.getScore();
+            window.localStorage.setItem('maxScore', Math.max(maxScore, score));
         }
         var gameOverBtn = $("#gameover > .replay ");
 
         gameOverBtn.click(function () {
             var eGameOver = $("#gameover");
             eGameOver.hide();
-            LOG(game);
-//            game.player.respawn();
-location.reload();
+            //  game.player.respawn();
+            location.reload();
         })
         game.showGameOver = showGameOver;
 

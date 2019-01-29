@@ -1,5 +1,7 @@
 var LOG = console.log;
-Game = function (game) { }
+Game = function (game) {
+    game.controller = this;
+ }
 
 
 Game.prototype = {
@@ -7,6 +9,13 @@ Game.prototype = {
 
         //load assets
         this.game.load.image('circle', 'asset/circle.png');
+        this.game.load.image('circle-0', 'asset/circle-skin-00.png');
+        this.game.load.image('circle-1', 'asset/circle-skin-00.png');
+        this.game.load.image('circle-2', 'asset/circle-skin-00.png');
+        this.game.load.image('circle-3', 'asset/circle-skin-00.png');
+        this.game.load.image('circle-4', 'asset/circle-skin-00.png');
+        this.game.load.image('circle-5', 'asset/circle-skin-00.png');
+
         this.game.load.image('shadow', 'asset/white-shadow.png');
         this.game.load.image('background', 'asset/bg54.jpg');
 
@@ -32,8 +41,17 @@ Game.prototype = {
         this.snakeHeadCollisionGroup = this.game.physics.p2.createCollisionGroup();
         this.foodCollisionGroup = this.game.physics.p2.createCollisionGroup();
 
+        var minimapScale = 0.2;
+        var minimapX = this.game.width - this.game.width*minimapScale/2 - 20;
+        var minimapY = this.game.camera.height -this.game.camera.height*minimapScale/2 - 20;
+        this.minimap = new Minimap(this.game, minimapX, minimapY, minimapScale);
+
+        var infoPanelX = 0;
+        var infoPanelY = this.game.camera.height - 60;
+        this.infoPanel = new InfoPanel(this.game, infoPanelX, infoPanelY); 
+
         //add food randomly
-        for (var i = 0; i < 100; i++) {
+        for (var i = 0; i < 500; i++) {
             this.initFood(Util.randomInt(-width, width), Util.randomInt(-height, height));
         }
 
@@ -41,7 +59,7 @@ Game.prototype = {
 
         this.spawnPlayer();
 
-        for (var i = 0; i < 2; i++) {
+        for (var i = 0; i < 6; i++) {
             this.spawnBot();
         }
 
@@ -58,6 +76,10 @@ Game.prototype = {
             var f = this.foodGroup.children[i];
             f.food.update();
         }
+
+        this.minimap.update();
+
+        this.infoPanel.update();
     },
     /**
      * Create a piece of food at a point
@@ -65,21 +87,26 @@ Game.prototype = {
      * @param  {number} y y-coordinate
      * @return {Food}   food object created
      */
-    initFood: function (x, y) {
-        var f = new Food(this.game, x, y);
+    initFood: function (x, y, value) {
+        var f = new Food(this.game, x, y, value);
         f.sprite.body.setCollisionGroup(this.foodCollisionGroup);
         this.foodGroup.add(f.sprite);
         f.sprite.body.collides([this.snakeHeadCollisionGroup]);
+        f.addDestroyedCallback(this.destroyMiniSprite.bind(this, f), this);
+        this.minimap.addFood(f); 
+
         return f;
     },
     snakeDestroyed: function (snake) {
         //place food where snake was destroyed
+        var value = snake.sections.length; 
         for (var i = 0; i < snake.headPath.length;
             i += Math.round(snake.headPath.length / snake.snakeLength) * 2) {
-            this.initFood(
-                snake.headPath[i].x + Util.randomInt(-10, 10),
-                snake.headPath[i].y + Util.randomInt(-10, 10)
-            );
+                this.initFood(
+                    snake.headPath[i].x + Util.randomInt(-10, 10),
+                    snake.headPath[i].y + Util.randomInt(-10, 10),
+                    Math.random() * 0.6 + value*0.0015
+                );
         }
 
         if (snake.type == 'bot') {
@@ -90,7 +117,9 @@ Game.prototype = {
     spawnBot: function () {
         var x = Util.randomInt(-this.game.width / 2, this.game.width / 2),
             y = Util.randomInt(-this.game.width / 2, this.game.width / 2);
-        var snake = new BotSnake(this.game, 'circle', x, y);
+        var skin = Util.randomInt(0, 5);
+
+        var snake = new BotSnake(this.game, 'circle-' + skin, x, y);
         snake.head.body.setCollisionGroup(this.snakeHeadCollisionGroup);
         snake.head.body.collides([this.foodCollisionGroup]);
         //callback for when a snake is destroyed
@@ -98,15 +127,22 @@ Game.prototype = {
 
     },
     spawnPlayer: function () {
-        var snake = new PlayerSnake(this.game, 'circle', 0, 0);
+        var skin = Util.randomInt(0, 5);
+
+        var snake = new PlayerSnake(this.game, 'circle-' + skin, 0, 0);
         snake.head.body.setCollisionGroup(this.snakeHeadCollisionGroup);
         snake.head.body.collides([this.foodCollisionGroup]);
         //callback for when a snake is destroyed
         snake.addDestroyedCallback(this.snakeDestroyed, this);
         snake.addDestroyedCallback(this.game.showGameOver, this);
+        snake.addDestroyedCallback(this.destroyMiniSprite.bind(this, snake), this);
         this.game.player = snake;
         this.game.camera.follow(snake.head);
         snake.respawn = this.spawnPlayer;
+        this.minimap.addSneak(snake);
+    },
+    destroyMiniSprite(object) {
+        this.minimap.destroyObject(object);
     }
 
 };

@@ -6,9 +6,13 @@
  * @param  {Number} y         coordinate
  */
 BotSnake = function(game, spriteKey, x, y) {
-    Snake.call(this, game, spriteKey, x, y);
-    this.trend = 1;
+    var initSections = Util.randomInt(0, 100);
+    var skin = Util.randomInt(0, 5);
+    Snake.call(this, game, spriteKey, x, y, skin, initSections);
+    this.trend = Math.random();
+
     this.type = 'bot';
+    this.name = 'Bot ' + Util.randomInt(0, 100);
 }
 
 BotSnake.prototype = Object.create(Snake.prototype);
@@ -20,11 +24,12 @@ BotSnake.prototype.constructor = BotSnake;
  */
 BotSnake.prototype.tempUpdate = BotSnake.prototype.update;
 BotSnake.prototype.update = function() {
+    // Snake.prototype.update.call(this);
     this.head.body.setZeroRotation();
 
     //ensure that the bot keeps rotating in one direction for a
     //substantial amount of time before switching directions
-    if (Util.randomInt(1,20) == 1) {
+    if (Util.randomInt(1,15) == 1) {
         this.trend *= -1;
     }
     this.head.body.rotateRight(this.trend * this.rotationSpeed);
