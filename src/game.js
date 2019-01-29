@@ -42,7 +42,7 @@ Game.prototype = {
         this.foodCollisionGroup = this.game.physics.p2.createCollisionGroup();
 
         var minimapScale = 0.2;
-        var minimapX = this.game.width - this.game.width*minimapScale/2 - 20;
+        var minimapX = this.game.width - this.game.width*minimapScale/4 - 30;
         var minimapY = this.game.camera.height -this.game.camera.height*minimapScale/2 - 20;
         this.minimap = new Minimap(this.game, minimapX, minimapY, minimapScale);
 
