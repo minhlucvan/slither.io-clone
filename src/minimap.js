@@ -15,7 +15,7 @@ Minimap = function (game, x, y, scale) {
     this.cameraBg = this.game.add.graphics(0, 0);
     
     this.cameraBg.beginFill(0xd3d3d3, 0.3);
-    this.cameraBg.drawRect(-this.game.width*2, -this.game.height*2, this.game.width*4, this.game.height*4);
+    this.cameraBg.drawRect(-this.game.world.width, -this.game.world.height, this.game.world.width*2, this.game.world.height*2);
     this.cameraBg.endFill();
     this.cameraBg.anchor.setTo(0.5, 0.5);
 

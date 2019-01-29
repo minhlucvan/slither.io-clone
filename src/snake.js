@@ -126,7 +126,7 @@ Snake.prototype = {
      * @param  {Integer} amount Number of sections to add to queue
      */
     addSectionsAfterLast: function(amount) {
-        this.queuedSections += amount;
+        this.queuedSections += (amount*30/this.sections.length);
     },
     /**
      * Call from the main update loop

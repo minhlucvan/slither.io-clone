@@ -9,7 +9,7 @@ Food = function (game, x, y, value) {
     this.game = game;
     this.x = x;
     this.y = y;
-    this.value = value || Math.random() * (0.6 - 0) + 0;
+    this.value = value || Math.random() * (0.7 - 0.3) + 0.3;
     this.debug = false;
     this.sprite = this.game.add.sprite(x, y, 'food');
     this.sprite.tint = Util.randomInt(0, 0xffffff);
@@ -17,7 +17,7 @@ Food = function (game, x, y, value) {
     this.game.physics.p2.enable(this.sprite, this.debug);
     this.sprite.body.clearShapes();
     this.sprite.body.addCircle(this.sprite.width * 0.5);
-    this.sprite.scale.setTo(2*this.value);
+    this.sprite.scale.setTo(1.5*this.value);
 
     //set callback for when something hits the food
     this.sprite.body.onBeginContact.add(this.onBeginContact, this);
